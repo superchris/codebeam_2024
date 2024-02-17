@@ -1,0 +1,11 @@
+<html>
+  <head>
+    <script type="module">
+      const {instance} = await WebAssembly.instantiateStreaming(fetch("hello.wasm"), {});
+      console.log(instance.exports.add(1, 3));
+    </script>
+  </head>
+  <body>
+    Hi!
+  </body>
+</html>

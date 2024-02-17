@@ -1,0 +1,5 @@
+package demo:hello;
+
+world my-world {
+  export say-hello: func(greetee: string) -> string
+}
