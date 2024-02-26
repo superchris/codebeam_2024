@@ -1,3 +1,8 @@
 %{
-  "orb": {:hex, :orb, "0.0.31", "2f1b20a3e97950a4906b89963a81adb9506fb1e4cdc63db57e6f2c7325f5d28a", [:mix], [], "hexpm", "cdab112488fb32baf692e1f78d66b36280ee47f01447750d113d80ffab64186f"},
+  "extism": {:hex, :extism, "1.0.0", "ddff96ba205ae669a55da39c3215917ea2d507d7191a6d4cab4318763774138a", [:mix], [{:json, "~> 1.4", [hex: :json, repo: "hexpm", optional: false]}, {:rustler, "~> 0.29", [hex: :rustler, repo: "hexpm", optional: false]}], "hexpm", "e0069ed2e7b671e4454a21f30af53169dc628440ea907be1cff4b67006191495"},
+  "jason": {:hex, :jason, "1.4.1", "af1504e35f629ddcdd6addb3513c3853991f694921b1b9368b0bd32beb9f1b63", [:mix], [{:decimal, "~> 1.0 or ~> 2.0", [hex: :decimal, repo: "hexpm", optional: true]}], "hexpm", "fbb01ecdfd565b56261302f7e1fcc27c4fb8f32d56eab74db621fc154604a7a1"},
+  "json": {:hex, :json, "1.4.1", "8648f04a9439765ad449bc56a3ff7d8b11dd44ff08ffcdefc4329f7c93843dfa", [:mix], [], "hexpm", "9abf218dbe4ea4fcb875e087d5f904ef263d012ee5ed21d46e9dbca63f053d16"},
+  "orb": {:hex, :orb, "0.0.33", "cc4323e80577c9c172f937f1924d526d330f22b8d8bf0a6bb8c4f9b7e093521d", [:mix], [], "hexpm", "37dfd73e8260fd32ed123f758b93915f1a8a60c57c86afdc1d8916b966474aaa"},
+  "rustler": {:hex, :rustler, "0.31.0", "7e5eefe61e6e6f8901e5aa3de60073d360c6320d9ec363027b0197297b80c46a", [:mix], [{:jason, "~> 1.0", [hex: :jason, repo: "hexpm", optional: false]}, {:toml, "~> 0.6", [hex: :toml, repo: "hexpm", optional: false]}], "hexpm", "99e378459bfb9c3bda6d3548b2b3bc6f9ad97f728f76bdbae7bf5c770a4f8abd"},
+  "toml": {:hex, :toml, "0.7.0", "fbcd773caa937d0c7a02c301a1feea25612720ac3fa1ccb8bfd9d30d822911de", [:mix], [], "hexpm", "0690246a2478c1defd100b0c9b89b4ea280a22be9a7b313a8a058a2408a2fa70"},
 }

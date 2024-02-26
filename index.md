@@ -30,8 +30,7 @@ style: |
   }
 ---
 
-# Beyond Request/Response
-### Why and how we should change the way we build web applications
+## It's time to start paying attention to WebAssembly (again)!
 Chris Nelson
 @superchris
 chris@launchscout.com
@@ -70,56 +69,26 @@ chris@launchscout.com
 ---
 
 # But rly so what?
-## It's also better abstraction boundary
+## It's also a better abstraction boundary
 ### And this is why it actually matters
 
 ---
 
-# Compared to what?
+# Ways to organize code
+- Functions
 - OTP processes
 - HTTP services
+  - Multiple languages supported here
 - Docker containers
 
 ---
 
-# Examples
-- Create a temperature converter slider
-  - dont wanna round trip to server each time
-  - offline
-- Create a form handler to drop stuff in a spreadsheet
-
----
-
-# Runtimes
-- Browsers
-  - Standard APIs for loading and executing
-  - integration with DOM (etc) is
-- WASI (WebAssembly System Interface)
-  - APIs for server side WASM
-  - Inspired by POSIX
-
----
-
-# Imaginary computers we know and love
-- Java
-- .NET CLR
-  - Stack based (same as WASM)
-- BEAM
-  - Register based
-
----
-
-# Java
-- Started as browser technology
-- Server side came later
-  - And that's when it really took off
-- Does anyone even remember applets?
-
----
-
-# My prediction: WASM is going the same (ish) way
-- Browser stuff is cool
-- Server side is what matters
+# What if we could move it up?
+- Functions
+  - Multiple languages supported here
+- OTP processes
+- HTTP services
+- Docker containers
 
 ---
 
@@ -147,14 +116,54 @@ chris@launchscout.com
 
 ---
 
-# The competition
+# Runtimes
+- Browsers
+  - Standard APIs for loading and executing
+  - integration with DOM (etc) is
+- WASI (WebAssembly System Interface)
+  - WASM on the server
+  - APIs for server side WASM
+  - Inspired by POSIX
 
 ---
 
-# WASI
-- WebAssembly System Interface
-- APIs for server side WASM
-- Currently at Preview 2
+# Do you remember this guy?
+
+![duke](duke.png)
+
+---
+
+# Java
+- Came on the scene as browser technology
+  - Netscape 1995
+- Server side came later
+  - And that's when it really took off
+- Does anyone even remember applets?
+
+---
+
+# My prediction: WASM is going the same (ish) way
+- Browser stuff is cool
+- Server side is what matters
+- But now we have a truly open ecosystem
+
+---
+
+# WASM is an *extremely* [dynamic space](https://webassembly.org/features/)
+## In particular, we should pay attention to:
+- WASM GC
+  - Enables garbage collected languages
+  - supported by Chrome, Firefox, NodeJS
+- Threads
+  - Chrome, Firefox, and Safari
+- Tail calls
+  - Chrome, Firefox
+
+---
+
+# WebAssembly 2.0
+- first public draft 4/19/2022
+- 3 working drafts last month!
 
 ---
 
@@ -169,7 +178,7 @@ chris@launchscout.com
 
 ---
 
-# Writing a WASM module from Elixir
+# Guesting: Writing a WASM module from Elixir
 The bad news and the good news
 
 ---
@@ -179,14 +188,185 @@ The bad news and the good news
 - Made some promising progress
 - Heavily invested in by Dockyard (and others?)
 - Not currently active
-  - "Looking for a home"
 
 ---
 
-# ORB
-## A DSL for WebAssembly
-- Less ambitious, but works!
-- Under
+# Firefly challenges
+- probably started to soon?
+- Needs some key extensions
+  - WASM GC
+  - Threads/async
+  - tail call
+- These things have made significant progress
+- Might be time for a restart?
+
+---
+
+# But then what?
+- Let's say Firefly gets "done"
+- Tracking Elixir/Erlang and keeping up
+- Official support for WASM would be the best possible future
+  - See me if this is something you wanna help advocate for
+
+---
+
+# Orb: A DSL for WebAssembly
+- A completely different approach
+- Macros that compile to WAT
+  - and then to WASM
+- Less ambitious, but actually works!
+- Maybe worse is better?
+
+---
+
+# Orb by example
+
+---
+
+# Running it in browser
+
+---
+
+# Hosting: calling WASM from Elixir
+## Possible scenarios
+- Leveraging libs from other languages
+- Allowing safe user extenstions to our system
+  - E.g., replacing a web hook
+
+---
+
+# What do we need?
+- A runtime environment
+- Type conversion
+  - Low level value types are easier
+  - High level types require memory management
+
+---
+
+# An example: Launch Elements
+- Custom elements with hosted backend
+- Launch Form: simple form wrapper
+- What to do with results
+  - Store em
+  - Email em
+  - ~~Send to web hook~~ custom logic in WASM
+
+---
+
+# Extism
+## "a plug-in system for everyone"
+- Making WASM practical
+- Hosts run a plugin
+  - Elixir SDK
+- Guests are a plugin
+  - PDKs are the tool here
+  - Not one for Elixir (yet)
+- Strings/byte I/O
+  - What they mean is up to you
+
+---
+
+# Extism host
+```elixir
+  defp fire_wasm_handler(%WasmHandler{wasm: %{file_name: file_name}}, response) do
+    manifest = %{wasm: [%{path: "./priv/static/uploads/#{file_name}"}], allowed_hosts: ["*"]}
+    {:ok, plugin} = Extism.Plugin.new(manifest, true)
+    Extism.Plugin.call(plugin, "handleForm", response |> Jason.encode!())
+  end
+```
+
+---
+
+# Extism guest
+```js
+function handleForm() {
+  const inputObject = JSON.parse(Host.inputString());
+  inputObject.name = `from wasm ${inputObject.name}`;
+  const request = {
+    method: "POST",
+    url: 'https://eoqkynla62cbht1.m.pipedream.net'
+  }
+  const response = Http.request(request, JSON.stringify(inputObject));
+  console.log(response);
+  if (response.status != 200) throw new Error(`Got non 200 response ${response.status}`)
+  Host.outputString(JSON.stringify(inputObject));
+}
+
+module.exports = { handleForm };
+```
+
+---
+
+# Live demo time
+
+---
+
+# WASI
+- WebAssembly System Interface
+- APIs for server side WASM
+  - What should a runtime provide?
+- Currently at Preview 2
+
+---
+
+# WASM Components
+- A layer over WASM modules
+- Rich, language agnostic type system
+- "lift" and "lower" into memory
+- Express high level dependencies
+- Composable
+- WASI P2 is implemented as components
+
+---
+
+# WIT
+#### An Interface Definition Language (IDL) for WASM Components
+```
+package local:todo-list
+
+world todo-list {
+  export init: func() -> list<string>
+  export add-todo: func(todo: string, todos: list<string>) -> list<string>
+}
+```
+---
+
+# Runtimes
+- Wasmtime
+  - Rust
+- JCO
+  - Javascript
+
+---
+
+# Elixir and WASM Components
+- Wasmex
+  - components not yet supported
+- Rustler
+  - rust for elixir
+
+---
+
+# Lets try it!
+
+---
+
+# Is it actually useful tho?
+## Err.. maybe?
+### Let's do another demo before we decide
+
+---
+
+# Imaginary computers we know and love
+- Java
+- .NET CLR
+  - Stack based (same as WASM)
+- BEAM
+  - Register based
+
+---
+
+# The competition
 
 ---
 
