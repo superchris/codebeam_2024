@@ -1,11 +1,19 @@
 <html>
-  <head>
-    <script type="module">
-      const {instance} = await WebAssembly.instantiateStreaming(fetch("hello.wasm"), {});
-      console.log(instance.exports.add(1, 3));
-    </script>
-  </head>
-  <body>
-    Hi!
-  </body>
+
+<head>
+  <script type="module">
+
+    const { instance } = await WebAssembly.instantiateStreaming(fetch("temperature_converter.wasm"), {});
+    const { celsius_to_fahrenheit } = instance.exports;
+    document.getElementById('slider').addEventListener('input', (evt) => {
+      console.log(`Celsius: ${evt.target.value}`);
+      console.log(`Fahrenheit: ${celsius_to_fahrenheit(Number(evt.target.value))}`);
+    })
+  </script>
+</head>
+
+<body>
+  Temperature converter: <input type="range" id="slider" name="celsius" min="0" max="100" />
+</body>
+
 </html>

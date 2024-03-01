@@ -61,16 +61,15 @@ chris@launchscout.com
 
 # So what?
 - Standardized by W3C (fine folks who brought us HTML etc)
-- We supported by all the browsers
+- Well supported by all the browsers
 - Portable
 - Fast
 - safe
 
 ---
 
-# But rly so what?
-## It's also a better abstraction boundary
-### And this is why it actually matters
+# It's also a better abstraction boundary
+### And this is what matters most
 
 ---
 
@@ -119,10 +118,11 @@ chris@launchscout.com
 # Runtimes
 - Browsers
   - Standard APIs for loading and executing
-  - integration with DOM (etc) is
+  - integration with DOM TBD
 - WASI (WebAssembly System Interface)
   - WASM on the server
   - APIs for server side WASM
+  - Filesystems, networking, etc
   - Inspired by POSIX
 
 ---
@@ -219,18 +219,62 @@ The bad news and the good news
 
 ---
 
-# Orb by example
+# More about Orb
+- *not* compiling Elixir to WASM
+- Thin layer over WebAssembly
+- globals, mutable state
+- controls flow
+  - if/then
+  - loops
+- Memory management
 
 ---
 
-# Running it in browser
+# Orb by example
+```elixir
+defmodule TemperatureConverter do
+  use Orb
 
+  defw celsius_to_fahrenheit(celsius: F32), F32 do
+    celsius |> F32.mul(F32.div(9.0, 5.0)) |> F32.add(32.0)
+  end
+
+end
+```
+```
+iex> File.write!("temperature_converter.wat", Orb.to_wat(TemperatureConverter))
+wasm2wat temperature_converter.wat -o temperature_converter.wasm
+```
+---
+
+# Running it in [browser](hello.html)
+```html
+<html>
+
+<head>
+  <script type="module">
+
+    const { instance } = await WebAssembly.instantiateStreaming(fetch("temperature_converter.wasm"), {});
+    const { celsius_to_fahrenheit } = instance.exports;
+    document.getElementById('slider').addEventListener('input', (evt) => {
+      console.log(`Celsius: ${evt.target.value}`);
+      console.log(`Fahrenheit: ${celsius_to_fahrenheit(Number(evt.target.value))}`);
+    })
+  </script>
+</head>
+
+<body>
+  Temperature converter: <input type="range" id="slider" name="celsius" min="0" max="100" />
+</body>
+
+</html>
+```
 ---
 
 # Hosting: calling WASM from Elixir
 ## Possible scenarios
 - Leveraging libs from other languages
-- Allowing safe user extenstions to our system
+- Allowing safe user extensions to our system
   - E.g., replacing a web hook
 
 ---
@@ -301,15 +345,14 @@ module.exports = { handleForm };
 
 ---
 
-# WASI
-- WebAssembly System Interface
-- APIs for server side WASM
-  - What should a runtime provide?
-- Currently at Preview 2
+# That was cool but..
+- might be nice to have a bit more structure
+- ad-hoc dependencies (Http)
 
 ---
 
 # WASM Components
+- Grew out of WASI
 - A layer over WASM modules
 - Rich, language agnostic type system
 - "lift" and "lower" into memory
@@ -321,6 +364,47 @@ module.exports = { handleForm };
 
 # WIT
 #### An Interface Definition Language (IDL) for WASM Components
+- package
+  - world
+    - interface
+    - functions
+    - types
+    - import/exports
+
+---
+# WIT type system
+- built in
+  - booleans
+  - numeric types
+  - string, char
+  - lists
+- user defined
+  - records
+  - variants
+  - enums
+
+---
+
+# WASM component implementations
+- Wasmtime (Rust)
+- JCO (Javascript)
+- componentize_py (Python)
+- ??? (Elixir)
+
+---
+
+# Elixir and WASM Components
+- Wasmex
+  - wrapper for wasmtime
+  - components not yet supported
+- Rustler
+  - rust for elixir
+  - we can "roll our own"
+
+---
+
+# WIT Example
+- This defines the interface my WASM component conforms to
 ```
 package local:todo-list
 
@@ -329,81 +413,82 @@ world todo-list {
   export add-todo: func(todo: string, todos: list<string>) -> list<string>
 }
 ```
----
-
-# Runtimes
-- Wasmtime
-  - Rust
-- JCO
-  - Javascript
 
 ---
 
-# Elixir and WASM Components
-- Wasmex
-  - components not yet supported
-- Rustler
-  - rust for elixir
+### The JS implementation...
+```js
+export function init() {
+  return ['Hello', 'WASM Components'];
+}
 
+export function addTodo(todo, todos) {
+  return [todo, ...todos];
+}
+```
+### Building it
+```
+jco componentize todo-list.js --wit todo-list.wit -n todo-list -o todo-list.wasm
+```
+---
+
+### The Elixir code to call it..
+```elixir
+defmodule LivestateTestbedWeb.WasmComponent do
+  use Rustler, otp_app: :livestate_testbed, crate: "livestatetestbedweb_wasmcomponent"
+
+  # When your NIF is loaded, it will override this function.
+  def init(), do: error()
+  def add_todo(_todo, _todo_list), do: error()
+
+  defp error, do: :erlang.nif_error(:nif_not_loaded)
+end
+```
+
+---
+
+## Rust code
+```rust
+#[rustler::nif(name = "add_todo")]
+fn add_todo_impl(todo: String, todo_list: Vec<String>) -> Vec<String> {
+    let mut config = Config::default();
+    config.wasm_component_model(true);
+    let engine = Engine::new(&config).unwrap();
+    let linker = Linker::new(&engine);
+
+    let mut table = Table::new();
+
+    let wasi = WasiCtxBuilder::new()
+        .build(&mut table);
+    let mut store = Store::new(&engine, wasi);
+
+    let component = Component::from_file(&engine, "./todo-list.wasm").context("Component file not found").unwrap();
+
+    let (instance, _) = TodoList::instantiate(&mut store, &component, &linker).unwrap();
+
+    instance.call_add_todo(&mut store, &todo, &todo_list[..]).unwrap()
+}
+
+rustler::init!("Elixir.LivestateTestbedWeb.WasmComponent", [init_impl, add_todo_impl]);
+```
 ---
 
 # Lets try it!
 
 ---
 
-# Is it actually useful tho?
-## Err.. maybe?
-### Let's do another demo before we decide
+# What will become possible..
+- WASM component based ecosystem is starting to emerge
+- WARG package registry
+  - Use any library for any language
+- WASM components as deployment artifacts
+  - Serverless functions for realz tho
+  - Already starting to happen
 
 ---
 
-# Imaginary computers we know and love
-- Java
-- .NET CLR
-  - Stack based (same as WASM)
-- BEAM
-  - Register based
-
----
-
-# The competition
-
----
-
-# WASI
-
----
-
-<!-- footer: ![](full-color.png) -->
-# Who am I?
-- 25+ year Web App Developer
-- 8+ yr Elixir dev
-- Co-Founder of Launch Scout
-- Creator of LiveState
-
----
-
-# Bonus round!:
-- WebAssembly!
-- Until fairly recently, not super practical
-  - Calling WebAssembly modules with anything other than numbers was a nightmare
-- Things like Extism and WebAssembly Components eliminate this hurdle
-- Writing event handlers in the language of your choice is now possible!
-
----
-
-## Livestate [todo list](http://localhost:4004) reducer in Javascript (compiled to wasm)
-```js
-import { wrap } from "./wrap";
-
-export const init = wrap(function() {
-  return { todos: ["Hello", "WASM"]};
-});
-
-export const addTodo = wrap(function({ todo }, { todos }) {
-  return { todos: [`${todo} from WASM!`, ...todos]};
-});
-
-```
+# We don't want to be left behind
+### The good news: it's still early times
+### We have a lot of work to do!
 
 ---
