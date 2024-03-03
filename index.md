@@ -38,30 +38,177 @@ chris@launchscout.com
 
 ---
 
-# Goals: to convince you that...
-- WebAssembly matters
-- Elixir support needs to improve
-- You can and should help!
-
----
-
-# Agenda
-- What is WebAssembly
-- Where is it now
-- Where is it going
-- What we can do in Elixir
-- What we need to able to do
+# Hi!
 
 ---
 
 # What is Web Assembly?
-### A binary instruction format for a stack-based virtual machine.
+### AKA WASM
+- A spec for a virtual machine
+- Kinda like
+  - BEAM
+  - JVM
+  - CLR
+## But..
+- Standardized by W3C (fine folks who brought us HTML etc)
+- Implemented by all the browsers
+- Lots of languages compile to WASM
+
+---
+
+# The two sides of WebAssembly
+## Host
+- Code which invokes WASM modules
+- Needs to provide a runtime environment
+## Guest
+- Code which is compiled to WASM modules
+- Hosted by a runtimes (eg browser?)
+
+---
+
+# We'd love to do both
+## But I think hosting is more practical
+## So I'm gonna talk about it first
+
+---
+
+# Story time
+
+---
+
+# Launch Elements
+- A set of hosted custom elements
+- Drop in functionality for static websites
+- Think: universal plugins for websites
+  - Ecommerce
+  - comments
+  - Hosted forms
+
+---
+
+# <launch-form>
+- a wrapper element for forms
+- saves the responses
+  - email
+  - posts to a webhook
+
+---
+
+## It sure would be cool to let users tell me what to do with their form responses
+
+---
+
+# That means I need
+- A way for user to provide code
+- Using whatever language they'd like
+- A way to execute it safely
+
+---
+
+# WebAssembly fits the bill!
+- Lots o languages compile to it
+- Runtimes for Elixir exist
+- It's safe and sandboxed
+  - No access to anything to explicitly granted
+
+---
+
+# But it needs a little help
+- Limited value types
+  - numbers
+  - functions
+    - imported and exported
+  - vectors
+- Any more complex is just bytes in memory
+- Which you get to manage :(
+
+---
+
+# Doesn't sound awesome...
+
+---
+
+# Extism
+## "a plug-in system for everyone"
+- Making WASM practical
+- Just enough memory management to do useful things
+- Strings/byte I/O
+  - What they mean is up to 
+  - JSON works well here
+
+---
+
+# How it works
+- Hosts use an SDK
+  - Elixir has one
+- Guests use a PDK
+  - most languages that compile to WASM supported
+
+---
+
+# A form handler function using Extism JS PDK
+```js
+function handleForm() {
+  const inputObject = JSON.parse(Host.inputString());
+  inputObject.source = `CodeBEAM 2024`;
+  const request = {
+    method: "POST",
+    url: 'https://eoqkynla62cbht1.m.pipedream.net'
+  }
+  const response = Http.request(request, JSON.stringify(inputObject));
+  console.log(response);
+  if (response.status != 200) throw new Error(`Got non 200 response ${response.status}`)
+  Host.outputString(JSON.stringify(inputObject));
+}
+
+module.exports = { handleForm };
+```
+---
+
+# Extism host
+```elixir
+  defp fire_wasm_handler(%WasmHandler{wasm: %{file_name: file_name}}, response) do
+    manifest = %{wasm: [%{path: "./priv/static/uploads/#{file_name}"}], allowed_hosts: ["*"]}
+    {:ok, plugin} = Extism.Plugin.new(manifest, true)
+    Extism.Plugin.call(plugin, "handleForm", response |> Jason.encode!())
+  end
+```
+
+---
+
+# [Live Demo](form-demo.html)
+
+---
+
+# That's awesome, but..
+- Maybe a little more structure?
+- More than just HTTP plz
+
+---
+
+# WASI
+## WebAssembly System Interface
+  - WASM on the server
+  - APIs Filesystems, networking, etc
+  - Used byosting provides
+    - wasmedge
+    - fermyon
+---
+
+# WebAssembly Component Model
+- Rich, language agnostic type system
+- "lift" and "lower" into memory
+- Express both imports and exports
+- Composable
+- WASI P2 is implemented as components
+
+---
+# Hey wait I thought this talk was about WebAssembly
 
 ---
 
 # So what?
-- Standardized by W3C (fine folks who brought us HTML etc)
-- Well supported by all the browsers
+
 - Portable
 - Fast
 - safe
@@ -104,26 +251,10 @@ chris@launchscout.com
 
 ---
 
-# WebAssembly 1.0
-- Limited value types
-  - numbers
-  - functions
-    - imported and exported
-  - vectors
-- Any more complex is just bytes in memory
-- Which you get to manage
-
----
-
 # Runtimes
 - Browsers
   - Standard APIs for loading and executing
   - integration with DOM TBD
-- WASI (WebAssembly System Interface)
-  - WASM on the server
-  - APIs for server side WASM
-  - Filesystems, networking, etc
-  - Inspired by POSIX
 
 ---
 
@@ -164,17 +295,6 @@ chris@launchscout.com
 # WebAssembly 2.0
 - first public draft 4/19/2022
 - 3 working drafts last month!
-
----
-
-# The two sides of WASM
-## Host
-- Code which invokes WASM modules
-- Needs to provide a runtime environment
-## Guest
-- Code which is compiled to WASM modules
-- Hosted by a runtimes (eg browser?)
-### We'd really like to do both!
 
 ---
 
@@ -269,96 +389,11 @@ wasm2wat temperature_converter.wat -o temperature_converter.wasm
 
 </html>
 ```
----
-
-# Hosting: calling WASM from Elixir
-## Possible scenarios
-- Leveraging libs from other languages
-- Allowing safe user extensions to our system
-  - E.g., replacing a web hook
-
----
-
-# What do we need?
-- A runtime environment
-- Type conversion
-  - Low level value types are easier
-  - High level types require memory management
-
----
-
-# An example: Launch Elements
-- Custom elements with hosted backend
-- Launch Form: simple form wrapper
-- What to do with results
-  - Store em
-  - Email em
-  - ~~Send to web hook~~ custom logic in WASM
-
----
-
-# Extism
-## "a plug-in system for everyone"
-- Making WASM practical
-- Hosts run a plugin
-  - Elixir SDK
-- Guests are a plugin
-  - PDKs are the tool here
-  - Not one for Elixir (yet)
-- Strings/byte I/O
-  - What they mean is up to you
-
----
-
-# Extism host
-```elixir
-  defp fire_wasm_handler(%WasmHandler{wasm: %{file_name: file_name}}, response) do
-    manifest = %{wasm: [%{path: "./priv/static/uploads/#{file_name}"}], allowed_hosts: ["*"]}
-    {:ok, plugin} = Extism.Plugin.new(manifest, true)
-    Extism.Plugin.call(plugin, "handleForm", response |> Jason.encode!())
-  end
-```
-
----
-
-# Extism guest
-```js
-function handleForm() {
-  const inputObject = JSON.parse(Host.inputString());
-  inputObject.name = `from wasm ${inputObject.name}`;
-  const request = {
-    method: "POST",
-    url: 'https://eoqkynla62cbht1.m.pipedream.net'
-  }
-  const response = Http.request(request, JSON.stringify(inputObject));
-  console.log(response);
-  if (response.status != 200) throw new Error(`Got non 200 response ${response.status}`)
-  Host.outputString(JSON.stringify(inputObject));
-}
-
-module.exports = { handleForm };
-```
-
----
-
-# Live demo time
-
----
-
-# That was cool but..
-- might be nice to have a bit more structure
-- ad-hoc dependencies (Http)
 
 ---
 
 # WASM Components
 - Grew out of WASI
-- A layer over WASM modules
-- Rich, language agnostic type system
-- "lift" and "lower" into memory
-- Express high level dependencies
-- Composable
-- WASI P2 is implemented as components
 
 ---
 

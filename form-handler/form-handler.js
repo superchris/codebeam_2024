@@ -1,6 +1,6 @@
 function handleForm() {
   const inputObject = JSON.parse(Host.inputString());
-  inputObject.name = `from wasm ${inputObject.name}`;
+  inputObject.source = `prepping for CodeBEAM 2024`;
   const request = {
     method: "POST",
     url: 'https://eoqkynla62cbht1.m.pipedream.net'

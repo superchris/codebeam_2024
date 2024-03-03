@@ -5,7 +5,8 @@
   "scripts": {
     "start": "npm run watch & live-server .",
     "watch": "marp --watch index.md -o index.html",
-    "build": "marp index.md -o index.html"
+    "build": "marp index.md -o index.html",
+    "extism:build": "cd form-handler && extism-js form-handler.js -i form-handler.d.ts -o form-handler.wasm"
   },
   "author": "",
   "license": "ISC",
