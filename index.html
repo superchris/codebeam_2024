@@ -1409,7 +1409,22 @@ section #title-slide-logo {
   margin-left: -60px;
 }
 ;">
-<h1 id="hey-wait-i-thought-this-talk-was-about-webassembly">Hey wait I thought this talk was about WebAssembly</h1>
+<h1 id="wit">WIT</h1>
+<h2 id="webassembly-interface-definition-language">WebAssembly Interface Definition Language</h2>
+<ul>
+<li>Defines the interface to a component</li>
+<li>Much richer type system
+<ul>
+<li>strings</li>
+<li>booleans</li>
+<li>lists</li>
+<li>enums</li>
+<li>variants</li>
+<li>records</li>
+<li>UDTs</li>
+</ul>
+</li>
+</ul>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="23" data-style="
 section h1 {
@@ -1466,11 +1481,12 @@ section #title-slide-logo {
   margin-left: -60px;
 }
 ;">
-<h1 id="so-what">So what?</h1>
+<h1 id="wasm-component-runtime-support">WASM component runtime support</h1>
 <ul>
-<li>Portable</li>
-<li>Fast</li>
-<li>safe</li>
+<li>Wasmtime (Rust)</li>
+<li>JCO (Javascript)</li>
+<li>componentize_py (Python)</li>
+<li>??? (Elixir)</li>
 </ul>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="24" data-style="
@@ -1528,8 +1544,21 @@ section #title-slide-logo {
   margin-left: -60px;
 }
 ;">
-<h1 id="its-also-a-better-abstraction-boundary">It's also a better abstraction boundary</h1>
-<h3 id="and-this-is-what-matters-most">And this is what matters most</h3>
+<h1 id="elixir-and-wasm-components">Elixir and WASM Components</h1>
+<ul>
+<li>Wasmex
+<ul>
+<li>wrapper for wasmtime</li>
+<li>components not yet supported</li>
+</ul>
+</li>
+<li>Rustler
+<ul>
+<li>rust for elixir</li>
+<li>we can &quot;roll our own&quot; component wrapper</li>
+</ul>
+</li>
+</ul>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="25" data-style="
 section h1 {
@@ -1586,17 +1615,15 @@ section #title-slide-logo {
   margin-left: -60px;
 }
 ;">
-<h1 id="ways-to-organize-code">Ways to organize code</h1>
-<ul>
-<li>Functions</li>
-<li>OTP processes</li>
-<li>HTTP services
-<ul>
-<li>Multiple languages supported here</li>
-</ul>
-</li>
-<li>Docker containers</li>
-</ul>
+<h1 id="lets-make-a-todo-list">Let's make a Todo List!</h1>
+<h2 id="todo-listwit">todo-list.wit</h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code>package local:todo-list;
+
+world todo-list {
+  export init: func() -&gt; list&lt;string&gt;;
+  export add-todo: func(todo: string, todos: list&lt;string&gt;) -&gt; list&lt;string&gt;;
+}
+</code></pre>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="26" data-style="
 section h1 {
@@ -1653,17 +1680,18 @@ section #title-slide-logo {
   margin-left: -60px;
 }
 ;">
-<h1 id="what-if-we-could-move-it-up">What if we could move it up?</h1>
-<ul>
-<li>Functions
-<ul>
-<li>Multiple languages supported here</li>
-</ul>
-</li>
-<li>OTP processes</li>
-<li>HTTP services</li>
-<li>Docker containers</li>
-</ul>
+<h3 id="the-js-implementation">The JS implementation...</h3>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">init</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">return</span> [<span class="hljs-string">&#x27;Hello&#x27;</span>, <span class="hljs-string">&#x27;WASM Components&#x27;</span>];
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">addTodo</span>(<span class="hljs-params">todo, todos</span>) {
+  <span class="hljs-keyword">return</span> [todo, ...todos];
+}
+</code></pre>
+<h3 id="building-it">Building it</h3>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code>jco componentize todo-list.js --wit todo-list.wit -n todo-list -o todo-list.wasm
+</code></pre>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="27" data-style="
 section h1 {
@@ -1720,30 +1748,19 @@ section #title-slide-logo {
   margin-left: -60px;
 }
 ;">
-<h1 id="webassembly-terms-and-concepts">WebAssembly terms and concepts</h1>
-<ul>
-<li>Modules
-<ul>
-<li>Code (WASM binary format)</li>
-<li>Declared imports/exports</li>
-</ul>
-</li>
-<li>Memory
-<ul>
-<li>An array of bytes to read/write</li>
-</ul>
-</li>
-<li>Tables
-<ul>
-<li>Imported/Exported references</li>
-</ul>
-</li>
-<li>Instances
-<ul>
-<li>Bundle of all of the above</li>
-</ul>
-</li>
-</ul>
+<h1 id="elixir-wrapper">Elixir wrapper</h1>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-elixir"><span class="hljs-class"><span class="hljs-keyword">defmodule</span> <span class="hljs-title">TodoList</span></span> <span class="hljs-keyword">do</span>
+  <span class="hljs-keyword">use</span> <span class="hljs-title class_">Rustler</span>, <span class="hljs-symbol">otp_app:</span> <span class="hljs-symbol">:wasm_component_demo</span>, <span class="hljs-symbol">crate:</span> <span class="hljs-string">&quot;todo_list&quot;</span>
+
+  <span class="hljs-comment"># When your NIF is loaded, it will override this function.</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">init</span></span>(serialized_component), <span class="hljs-symbol">do:</span> error()
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">add_todo</span></span>(serialized_component, todo, todo_list), <span class="hljs-symbol">do:</span> error()
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">load_component</span></span>(), <span class="hljs-symbol">do:</span> error()
+
+  <span class="hljs-function"><span class="hljs-keyword">defp</span> <span class="hljs-title">error</span></span>, <span class="hljs-symbol">do:</span> <span class="hljs-symbol">:erlang</span>.nif_error(<span class="hljs-symbol">:nif_not_loaded</span>)
+<span class="hljs-keyword">end</span>
+</code></pre>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="28" data-style="
 section h1 {
@@ -1800,15 +1817,7 @@ section #title-slide-logo {
   margin-left: -60px;
 }
 ;">
-<h1 id="runtimes">Runtimes</h1>
-<ul>
-<li>Browsers
-<ul>
-<li>Standard APIs for loading and executing</li>
-<li>integration with DOM TBD</li>
-</ul>
-</li>
-</ul>
+<h1 id="lets-try-it">Let's try it...</h1>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="29" data-style="
 section h1 {
@@ -1865,8 +1874,22 @@ section #title-slide-logo {
   margin-left: -60px;
 }
 ;">
-<h1 id="do-you-remember-this-guy">Do you remember this guy?</h1>
-<p><img src="duke.png" alt="duke" /></p>
+<h1 id="components-yes-its-still-early-but">Components: Yes, it's still early but...</h1>
+<ul>
+<li>WASM component based ecosystem is starting to emerge</li>
+<li>WARG package registry
+<ul>
+<li>Use any library for any language</li>
+</ul>
+</li>
+<li>WASM components as deployment artifacts
+<ul>
+<li>Replacing docker/k8s</li>
+<li>Serverless functions for realz tho</li>
+<li>Already starting to happen</li>
+</ul>
+</li>
+</ul>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="30" data-style="
 section h1 {
@@ -1923,279 +1946,10 @@ section #title-slide-logo {
   margin-left: -60px;
 }
 ;">
-<h1 id="java">Java</h1>
-<ul>
-<li>Came on the scene as browser technology
-<ul>
-<li>Netscape 1995</li>
-</ul>
-</li>
-<li>Server side came later
-<ul>
-<li>And that's when it really took off</li>
-</ul>
-</li>
-<li>Does anyone even remember applets?</li>
-</ul>
+<h1 id="but-what-about-the-browser">But what about the browser?</h1>
+<h3 id="elixir-as-a-guest">Elixir as a Guest</h3>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="31" data-style="
-section h1 {
-  color: #6042BC;
-}
-
-section code {
-  background-color: #e0e0ff;
-}
-
-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100px;
-}
-
-footer img {
-  position: absolute;
-  width: 120px;
-  right: 20px;
-  top: 0;
-
-}
-section #title-slide-logo {
-  margin-left: -60px;
-}
-" lang="en-US" style="--style:
-section h1 {
-  color: #6042BC;
-}
-
-section code {
-  background-color: #e0e0ff;
-}
-
-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100px;
-}
-
-footer img {
-  position: absolute;
-  width: 120px;
-  right: 20px;
-  top: 0;
-
-}
-section #title-slide-logo {
-  margin-left: -60px;
-}
-;">
-<h1 id="my-prediction-wasm-is-going-the-same-ish-way">My prediction: WASM is going the same (ish) way</h1>
-<ul>
-<li>Browser stuff is cool</li>
-<li>Server side is what matters</li>
-<li>But now we have a truly open ecosystem</li>
-</ul>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="32" data-style="
-section h1 {
-  color: #6042BC;
-}
-
-section code {
-  background-color: #e0e0ff;
-}
-
-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100px;
-}
-
-footer img {
-  position: absolute;
-  width: 120px;
-  right: 20px;
-  top: 0;
-
-}
-section #title-slide-logo {
-  margin-left: -60px;
-}
-" lang="en-US" style="--style:
-section h1 {
-  color: #6042BC;
-}
-
-section code {
-  background-color: #e0e0ff;
-}
-
-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100px;
-}
-
-footer img {
-  position: absolute;
-  width: 120px;
-  right: 20px;
-  top: 0;
-
-}
-section #title-slide-logo {
-  margin-left: -60px;
-}
-;">
-<h1 id="wasm-is-an-extremely-dynamic-space">WASM is an <em>extremely</em> <a href="https://webassembly.org/features/">dynamic space</a></h1>
-<h2 id="in-particular-we-should-pay-attention-to">In particular, we should pay attention to:</h2>
-<ul>
-<li>WASM GC
-<ul>
-<li>Enables garbage collected languages</li>
-<li>supported by Chrome, Firefox, NodeJS</li>
-</ul>
-</li>
-<li>Threads
-<ul>
-<li>Chrome, Firefox, and Safari</li>
-</ul>
-</li>
-<li>Tail calls
-<ul>
-<li>Chrome, Firefox</li>
-</ul>
-</li>
-</ul>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="33" data-style="
-section h1 {
-  color: #6042BC;
-}
-
-section code {
-  background-color: #e0e0ff;
-}
-
-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100px;
-}
-
-footer img {
-  position: absolute;
-  width: 120px;
-  right: 20px;
-  top: 0;
-
-}
-section #title-slide-logo {
-  margin-left: -60px;
-}
-" lang="en-US" style="--style:
-section h1 {
-  color: #6042BC;
-}
-
-section code {
-  background-color: #e0e0ff;
-}
-
-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100px;
-}
-
-footer img {
-  position: absolute;
-  width: 120px;
-  right: 20px;
-  top: 0;
-
-}
-section #title-slide-logo {
-  margin-left: -60px;
-}
-;">
-<h1 id="webassembly-20">WebAssembly 2.0</h1>
-<ul>
-<li>first public draft 4/19/2022</li>
-<li>3 working drafts last month!</li>
-</ul>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="34" data-style="
-section h1 {
-  color: #6042BC;
-}
-
-section code {
-  background-color: #e0e0ff;
-}
-
-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100px;
-}
-
-footer img {
-  position: absolute;
-  width: 120px;
-  right: 20px;
-  top: 0;
-
-}
-section #title-slide-logo {
-  margin-left: -60px;
-}
-" lang="en-US" style="--style:
-section h1 {
-  color: #6042BC;
-}
-
-section code {
-  background-color: #e0e0ff;
-}
-
-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100px;
-}
-
-footer img {
-  position: absolute;
-  width: 120px;
-  right: 20px;
-  top: 0;
-
-}
-section #title-slide-logo {
-  margin-left: -60px;
-}
-;">
-<h1 id="guesting-writing-a-wasm-module-from-elixir">Guesting: Writing a WASM module from Elixir</h1>
-<p>The bad news and the good news</p>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="35" data-style="
 section h1 {
   color: #6042BC;
 }
@@ -2258,7 +2012,7 @@ section #title-slide-logo {
 <li>Not currently active</li>
 </ul>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="36" data-style="
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="32" data-style="
 section h1 {
   color: #6042BC;
 }
@@ -2327,7 +2081,7 @@ section #title-slide-logo {
 <li>Might be time for a restart?</li>
 </ul>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="37" data-style="
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="33" data-style="
 section h1 {
   color: #6042BC;
 }
@@ -2386,14 +2140,12 @@ section #title-slide-logo {
 <ul>
 <li>Let's say Firefly gets &quot;done&quot;</li>
 <li>Tracking Elixir/Erlang and keeping up</li>
-<li>Official support for WASM would be the best possible future
-<ul>
-<li>See me if this is something you wanna help advocate for</li>
-</ul>
-</li>
+<li>Official support for WASM would be the &quot;gold standard&quot;</li>
+<li>Lot of work to get there</li>
+<li>Lots of advocacy needed to make it happen</li>
 </ul>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="38" data-style="
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="34" data-style="
 section h1 {
   color: #6042BC;
 }
@@ -2451,85 +2203,16 @@ section #title-slide-logo {
 <h1 id="orb-a-dsl-for-webassembly">Orb: A DSL for WebAssembly</h1>
 <ul>
 <li>A completely different approach</li>
-<li>Macros that compile to WAT
+<li>Macros that compile to WASM (via WAT)</li>
+<li>Pretty low level
 <ul>
-<li>and then to WASM</li>
+<li>No component support (yet)</li>
+<li>Memory management is up to you</li>
 </ul>
 </li>
-<li>Less ambitious, but actually works!</li>
-<li>Maybe worse is better?</li>
 </ul>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="39" data-style="
-section h1 {
-  color: #6042BC;
-}
-
-section code {
-  background-color: #e0e0ff;
-}
-
-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100px;
-}
-
-footer img {
-  position: absolute;
-  width: 120px;
-  right: 20px;
-  top: 0;
-
-}
-section #title-slide-logo {
-  margin-left: -60px;
-}
-" lang="en-US" style="--style:
-section h1 {
-  color: #6042BC;
-}
-
-section code {
-  background-color: #e0e0ff;
-}
-
-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100px;
-}
-
-footer img {
-  position: absolute;
-  width: 120px;
-  right: 20px;
-  top: 0;
-
-}
-section #title-slide-logo {
-  margin-left: -60px;
-}
-;">
-<h1 id="more-about-orb">More about Orb</h1>
-<ul>
-<li><em>not</em> compiling Elixir to WASM</li>
-<li>Thin layer over WebAssembly</li>
-<li>globals, mutable state</li>
-<li>controls flow
-<ul>
-<li>if/then</li>
-<li>loops</li>
-</ul>
-</li>
-<li>Memory management</li>
-</ul>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="40" data-style="
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="35" data-style="
 section h1 {
   color: #6042BC;
 }
@@ -2598,7 +2281,7 @@ section #title-slide-logo {
 wasm2wat temperature_converter.wat -o temperature_converter.wasm
 </code></pre>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="41" data-style="
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="36" data-style="
 section h1 {
   color: #6042BC;
 }
@@ -2653,7 +2336,7 @@ section #title-slide-logo {
   margin-left: -60px;
 }
 ;">
-<h1 id="running-it-in-browser">Running it in <a href="hello.html">browser</a></h1>
+<h1 id="running-it-in-browser">Running it in <a href="temperature_converter.html">browser</a></h1>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">html</span>&gt;</span>
 
 <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
@@ -2675,7 +2358,7 @@ section #title-slide-logo {
 <span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
 </code></pre>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="42" data-style="
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="37" data-style="
 section h1 {
   color: #6042BC;
 }
@@ -2730,12 +2413,16 @@ section #title-slide-logo {
   margin-left: -60px;
 }
 ;">
-<h1 id="wasm-components">WASM Components</h1>
+<h1 id="other-things-orb-can-do">Other things Orb can do</h1>
 <ul>
-<li>Grew out of WASI</li>
+<li>Mutable globals (eww?)</li>
+<li>Loops and conditionals</li>
+<li>Memory allocation</li>
+<li>String constants</li>
+<li>Compile time Elixir</li>
 </ul>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="43" data-style="
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="38" data-style="
 section h1 {
   color: #6042BC;
 }
@@ -2790,24 +2477,10 @@ section #title-slide-logo {
   margin-left: -60px;
 }
 ;">
-<h1 id="wit">WIT</h1>
-<h4 id="an-interface-definition-language-idl-for-wasm-components">An Interface Definition Language (IDL) for WASM Components</h4>
-<ul>
-<li>package
-<ul>
-<li>world
-<ul>
-<li>interface</li>
-<li>functions</li>
-<li>types</li>
-<li>import/exports</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
+<h1 id="this-is-a-start">This is a start</h1>
+<h2 id="but-the-reality-is-we-are-in-danger-of-being-left-behind">But the reality is we are in danger of being <a href="https://developer.fermyon.com/wasm-languages/webassembly-language-support">left behind</a></h2>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="44" data-style="
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="39" data-style="
 section h1 {
   color: #6042BC;
 }
@@ -2862,628 +2535,9 @@ section #title-slide-logo {
   margin-left: -60px;
 }
 ;">
-<h1 id="wit-type-system">WIT type system</h1>
-<ul>
-<li>built in
-<ul>
-<li>booleans</li>
-<li>numeric types</li>
-<li>string, char</li>
-<li>lists</li>
-</ul>
-</li>
-<li>user defined
-<ul>
-<li>records</li>
-<li>variants</li>
-<li>enums</li>
-</ul>
-</li>
-</ul>
+<h1 id="you-can-help">You can help!</h1>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="45" data-style="
-section h1 {
-  color: #6042BC;
-}
-
-section code {
-  background-color: #e0e0ff;
-}
-
-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100px;
-}
-
-footer img {
-  position: absolute;
-  width: 120px;
-  right: 20px;
-  top: 0;
-
-}
-section #title-slide-logo {
-  margin-left: -60px;
-}
-" lang="en-US" style="--style:
-section h1 {
-  color: #6042BC;
-}
-
-section code {
-  background-color: #e0e0ff;
-}
-
-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100px;
-}
-
-footer img {
-  position: absolute;
-  width: 120px;
-  right: 20px;
-  top: 0;
-
-}
-section #title-slide-logo {
-  margin-left: -60px;
-}
-;">
-<h1 id="wasm-component-implementations">WASM component implementations</h1>
-<ul>
-<li>Wasmtime (Rust)</li>
-<li>JCO (Javascript)</li>
-<li>componentize_py (Python)</li>
-<li>??? (Elixir)</li>
-</ul>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="46" data-style="
-section h1 {
-  color: #6042BC;
-}
-
-section code {
-  background-color: #e0e0ff;
-}
-
-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100px;
-}
-
-footer img {
-  position: absolute;
-  width: 120px;
-  right: 20px;
-  top: 0;
-
-}
-section #title-slide-logo {
-  margin-left: -60px;
-}
-" lang="en-US" style="--style:
-section h1 {
-  color: #6042BC;
-}
-
-section code {
-  background-color: #e0e0ff;
-}
-
-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100px;
-}
-
-footer img {
-  position: absolute;
-  width: 120px;
-  right: 20px;
-  top: 0;
-
-}
-section #title-slide-logo {
-  margin-left: -60px;
-}
-;">
-<h1 id="elixir-and-wasm-components">Elixir and WASM Components</h1>
-<ul>
-<li>Wasmex
-<ul>
-<li>wrapper for wasmtime</li>
-<li>components not yet supported</li>
-</ul>
-</li>
-<li>Rustler
-<ul>
-<li>rust for elixir</li>
-<li>we can &quot;roll our own&quot;</li>
-</ul>
-</li>
-</ul>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="47" data-style="
-section h1 {
-  color: #6042BC;
-}
-
-section code {
-  background-color: #e0e0ff;
-}
-
-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100px;
-}
-
-footer img {
-  position: absolute;
-  width: 120px;
-  right: 20px;
-  top: 0;
-
-}
-section #title-slide-logo {
-  margin-left: -60px;
-}
-" lang="en-US" style="--style:
-section h1 {
-  color: #6042BC;
-}
-
-section code {
-  background-color: #e0e0ff;
-}
-
-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100px;
-}
-
-footer img {
-  position: absolute;
-  width: 120px;
-  right: 20px;
-  top: 0;
-
-}
-section #title-slide-logo {
-  margin-left: -60px;
-}
-;">
-<h1 id="wit-example">WIT Example</h1>
-<ul>
-<li>This defines the interface my WASM component conforms to</li>
-</ul>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code>package local:todo-list
-
-world todo-list {
-  export init: func() -&gt; list&lt;string&gt;
-  export add-todo: func(todo: string, todos: list&lt;string&gt;) -&gt; list&lt;string&gt;
-}
-</code></pre>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="48" data-style="
-section h1 {
-  color: #6042BC;
-}
-
-section code {
-  background-color: #e0e0ff;
-}
-
-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100px;
-}
-
-footer img {
-  position: absolute;
-  width: 120px;
-  right: 20px;
-  top: 0;
-
-}
-section #title-slide-logo {
-  margin-left: -60px;
-}
-" lang="en-US" style="--style:
-section h1 {
-  color: #6042BC;
-}
-
-section code {
-  background-color: #e0e0ff;
-}
-
-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100px;
-}
-
-footer img {
-  position: absolute;
-  width: 120px;
-  right: 20px;
-  top: 0;
-
-}
-section #title-slide-logo {
-  margin-left: -60px;
-}
-;">
-<h3 id="the-js-implementation">The JS implementation...</h3>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">init</span>(<span class="hljs-params"></span>) {
-  <span class="hljs-keyword">return</span> [<span class="hljs-string">&#x27;Hello&#x27;</span>, <span class="hljs-string">&#x27;WASM Components&#x27;</span>];
-}
-
-<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">addTodo</span>(<span class="hljs-params">todo, todos</span>) {
-  <span class="hljs-keyword">return</span> [todo, ...todos];
-}
-</code></pre>
-<h3 id="building-it">Building it</h3>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code>jco componentize todo-list.js --wit todo-list.wit -n todo-list -o todo-list.wasm
-</code></pre>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="49" data-style="
-section h1 {
-  color: #6042BC;
-}
-
-section code {
-  background-color: #e0e0ff;
-}
-
-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100px;
-}
-
-footer img {
-  position: absolute;
-  width: 120px;
-  right: 20px;
-  top: 0;
-
-}
-section #title-slide-logo {
-  margin-left: -60px;
-}
-" lang="en-US" style="--style:
-section h1 {
-  color: #6042BC;
-}
-
-section code {
-  background-color: #e0e0ff;
-}
-
-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100px;
-}
-
-footer img {
-  position: absolute;
-  width: 120px;
-  right: 20px;
-  top: 0;
-
-}
-section #title-slide-logo {
-  margin-left: -60px;
-}
-;">
-<h3 id="the-elixir-code-to-call-it">The Elixir code to call it..</h3>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-elixir"><span class="hljs-class"><span class="hljs-keyword">defmodule</span> <span class="hljs-title">LivestateTestbedWeb.WasmComponent</span></span> <span class="hljs-keyword">do</span>
-  <span class="hljs-keyword">use</span> <span class="hljs-title class_">Rustler</span>, <span class="hljs-symbol">otp_app:</span> <span class="hljs-symbol">:livestate_testbed</span>, <span class="hljs-symbol">crate:</span> <span class="hljs-string">&quot;livestatetestbedweb_wasmcomponent&quot;</span>
-
-  <span class="hljs-comment"># When your NIF is loaded, it will override this function.</span>
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">init</span></span>(), <span class="hljs-symbol">do:</span> error()
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">add_todo</span></span>(_todo, _todo_list), <span class="hljs-symbol">do:</span> error()
-
-  <span class="hljs-function"><span class="hljs-keyword">defp</span> <span class="hljs-title">error</span></span>, <span class="hljs-symbol">do:</span> <span class="hljs-symbol">:erlang</span>.nif_error(<span class="hljs-symbol">:nif_not_loaded</span>)
-<span class="hljs-keyword">end</span>
-</code></pre>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="50" data-style="
-section h1 {
-  color: #6042BC;
-}
-
-section code {
-  background-color: #e0e0ff;
-}
-
-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100px;
-}
-
-footer img {
-  position: absolute;
-  width: 120px;
-  right: 20px;
-  top: 0;
-
-}
-section #title-slide-logo {
-  margin-left: -60px;
-}
-" lang="en-US" style="--style:
-section h1 {
-  color: #6042BC;
-}
-
-section code {
-  background-color: #e0e0ff;
-}
-
-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100px;
-}
-
-footer img {
-  position: absolute;
-  width: 120px;
-  right: 20px;
-  top: 0;
-
-}
-section #title-slide-logo {
-  margin-left: -60px;
-}
-;">
-<h2 id="rust-code">Rust code</h2>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-rust"><span class="hljs-meta">#[rustler::nif(name = <span class="hljs-string">&quot;add_todo&quot;</span>)]</span>
-<span class="hljs-keyword">fn</span> <span class="hljs-title function_">add_todo_impl</span>(todo: <span class="hljs-type">String</span>, todo_list: <span class="hljs-type">Vec</span>&lt;<span class="hljs-type">String</span>&gt;) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-type">Vec</span>&lt;<span class="hljs-type">String</span>&gt; {
-    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut </span><span class="hljs-variable">config</span> = Config::<span class="hljs-title function_ invoke__">default</span>();
-    config.<span class="hljs-title function_ invoke__">wasm_component_model</span>(<span class="hljs-literal">true</span>);
-    <span class="hljs-keyword">let</span> <span class="hljs-variable">engine</span> = Engine::<span class="hljs-title function_ invoke__">new</span>(&amp;config).<span class="hljs-title function_ invoke__">unwrap</span>();
-    <span class="hljs-keyword">let</span> <span class="hljs-variable">linker</span> = Linker::<span class="hljs-title function_ invoke__">new</span>(&amp;engine);
-
-    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut </span><span class="hljs-variable">table</span> = Table::<span class="hljs-title function_ invoke__">new</span>();
-
-    <span class="hljs-keyword">let</span> <span class="hljs-variable">wasi</span> = WasiCtxBuilder::<span class="hljs-title function_ invoke__">new</span>()
-        .<span class="hljs-title function_ invoke__">build</span>(&amp;<span class="hljs-keyword">mut</span> table);
-    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut </span><span class="hljs-variable">store</span> = Store::<span class="hljs-title function_ invoke__">new</span>(&amp;engine, wasi);
-
-    <span class="hljs-keyword">let</span> <span class="hljs-variable">component</span> = Component::<span class="hljs-title function_ invoke__">from_file</span>(&amp;engine, <span class="hljs-string">&quot;./todo-list.wasm&quot;</span>).<span class="hljs-title function_ invoke__">context</span>(<span class="hljs-string">&quot;Component file not found&quot;</span>).<span class="hljs-title function_ invoke__">unwrap</span>();
-
-    <span class="hljs-keyword">let</span> (instance, _) = TodoList::<span class="hljs-title function_ invoke__">instantiate</span>(&amp;<span class="hljs-keyword">mut</span> store, &amp;component, &amp;linker).<span class="hljs-title function_ invoke__">unwrap</span>();
-
-    instance.<span class="hljs-title function_ invoke__">call_add_todo</span>(&amp;<span class="hljs-keyword">mut</span> store, &amp;todo, &amp;todo_list[..]).<span class="hljs-title function_ invoke__">unwrap</span>()
-}
-
-rustler::init!(<span class="hljs-string">&quot;Elixir.LivestateTestbedWeb.WasmComponent&quot;</span>, [init_impl, add_todo_impl]);
-</code></pre>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="51" data-style="
-section h1 {
-  color: #6042BC;
-}
-
-section code {
-  background-color: #e0e0ff;
-}
-
-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100px;
-}
-
-footer img {
-  position: absolute;
-  width: 120px;
-  right: 20px;
-  top: 0;
-
-}
-section #title-slide-logo {
-  margin-left: -60px;
-}
-" lang="en-US" style="--style:
-section h1 {
-  color: #6042BC;
-}
-
-section code {
-  background-color: #e0e0ff;
-}
-
-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100px;
-}
-
-footer img {
-  position: absolute;
-  width: 120px;
-  right: 20px;
-  top: 0;
-
-}
-section #title-slide-logo {
-  margin-left: -60px;
-}
-;">
-<h1 id="lets-try-it">Lets try it!</h1>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="52" data-style="
-section h1 {
-  color: #6042BC;
-}
-
-section code {
-  background-color: #e0e0ff;
-}
-
-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100px;
-}
-
-footer img {
-  position: absolute;
-  width: 120px;
-  right: 20px;
-  top: 0;
-
-}
-section #title-slide-logo {
-  margin-left: -60px;
-}
-" lang="en-US" style="--style:
-section h1 {
-  color: #6042BC;
-}
-
-section code {
-  background-color: #e0e0ff;
-}
-
-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100px;
-}
-
-footer img {
-  position: absolute;
-  width: 120px;
-  right: 20px;
-  top: 0;
-
-}
-section #title-slide-logo {
-  margin-left: -60px;
-}
-;">
-<h1 id="what-will-become-possible">What will become possible..</h1>
-<ul>
-<li>WASM component based ecosystem is starting to emerge</li>
-<li>WARG package registry
-<ul>
-<li>Use any library for any language</li>
-</ul>
-</li>
-<li>WASM components as deployment artifacts
-<ul>
-<li>Serverless functions for realz tho</li>
-<li>Already starting to happen</li>
-</ul>
-</li>
-</ul>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="53" data-style="
-section h1 {
-  color: #6042BC;
-}
-
-section code {
-  background-color: #e0e0ff;
-}
-
-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100px;
-}
-
-footer img {
-  position: absolute;
-  width: 120px;
-  right: 20px;
-  top: 0;
-
-}
-section #title-slide-logo {
-  margin-left: -60px;
-}
-" lang="en-US" style="--style:
-section h1 {
-  color: #6042BC;
-}
-
-section code {
-  background-color: #e0e0ff;
-}
-
-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100px;
-}
-
-footer img {
-  position: absolute;
-  width: 120px;
-  right: 20px;
-  top: 0;
-
-}
-section #title-slide-logo {
-  margin-left: -60px;
-}
-;">
-<h1 id="we-dont-want-to-be-left-behind">We don't want to be left behind</h1>
-<h3 id="the-good-news-its-still-early-times">The good news: it's still early times</h3>
-<h3 id="we-have-a-lot-of-work-to-do">We have a lot of work to do!</h3>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="54" data-style="
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="40" data-style="
 section h1 {
   color: #6042BC;
 }

@@ -1,0 +1,21 @@
+<html>
+
+<head>
+  <script type="module">
+
+    const { instance } = await WebAssembly.instantiateStreaming(fetch("temperature_converter.wasm"), {});
+    const { celsius_to_fahrenheit } = instance.exports;
+    document.getElementById('slider').addEventListener('input', (evt) => {
+      document.getElementById('celsius').innerHTML = evt.target.value;
+      document.getElementById('fahrenheit').innerHTML = celsius_to_fahrenheit(Number(evt.target.value));
+    })
+  </script>
+</head>
+
+<body>
+  Temperature converter: <input type="range" id="slider" name="celsius" min="0" max="100" />
+  <div>Celsius: <span id="celsius"></span></div>
+  <div>Fahrenheit: <span id="fahrenheit"></span></div>
+</body>
+
+</html>

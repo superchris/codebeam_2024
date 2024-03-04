@@ -163,6 +163,7 @@ function handleForm() {
 
 module.exports = { handleForm };
 ```
+
 ---
 
 # Extism host
@@ -203,103 +204,103 @@ module.exports = { handleForm };
 - WASI P2 is implemented as components
 
 ---
-# Hey wait I thought this talk was about WebAssembly
+
+# WIT
+## WebAssembly Interface Definition Language
+- Defines the interface to a component
+- Much richer type system
+  - strings
+  - booleans
+  - lists
+  - enums
+  - variants
+  - records
+  - UDTs
 
 ---
 
-# So what?
-
-- Portable
-- Fast
-- safe
-
----
-
-# It's also a better abstraction boundary
-### And this is what matters most
+# WASM component runtime support
+- Wasmtime (Rust)
+- JCO (Javascript)
+- componentize_py (Python)
+- ??? (Elixir)
 
 ---
 
-# Ways to organize code
-- Functions
-- OTP processes
-- HTTP services
-  - Multiple languages supported here
-- Docker containers
+# Elixir and WASM Components
+- Wasmex
+  - wrapper for wasmtime
+  - components not yet supported
+- Rustler
+  - rust for elixir
+  - we can "roll our own" component wrapper
 
 ---
 
-# What if we could move it up?
-- Functions
-  - Multiple languages supported here
-- OTP processes
-- HTTP services
-- Docker containers
+# Let's make a Todo List!
+## todo-list.wit
+```
+package local:todo-list;
+
+world todo-list {
+  export init: func() -> list<string>;
+  export add-todo: func(todo: string, todos: list<string>) -> list<string>;
+}
+```
 
 ---
 
-# WebAssembly terms and concepts
-- Modules
-  - Code (WASM binary format)
-  - Declared imports/exports
-- Memory
-  - An array of bytes to read/write
-- Tables
-  - Imported/Exported references
-- Instances
-  - Bundle of all of the above
+### The JS implementation...
+```js
+export function init() {
+  return ['Hello', 'WASM Components'];
+}
+
+export function addTodo(todo, todos) {
+  return [todo, ...todos];
+}
+```
+### Building it
+```
+jco componentize todo-list.js --wit todo-list.wit -n todo-list -o todo-list.wasm
+```
 
 ---
 
-# Runtimes
-- Browsers
-  - Standard APIs for loading and executing
-  - integration with DOM TBD
+# Elixir wrapper
+```elixir
+defmodule TodoList do
+  use Rustler, otp_app: :wasm_component_demo, crate: "todo_list"
+
+  # When your NIF is loaded, it will override this function.
+  def init(serialized_component), do: error()
+  def add_todo(serialized_component, todo, todo_list), do: error()
+
+  def load_component(), do: error()
+
+  defp error, do: :erlang.nif_error(:nif_not_loaded)
+end
+```
 
 ---
 
-# Do you remember this guy?
-
-![duke](duke.png)
+# Let's try it...
 
 ---
 
-# Java
-- Came on the scene as browser technology
-  - Netscape 1995
-- Server side came later
-  - And that's when it really took off
-- Does anyone even remember applets?
+# Components: Yes, it's still early but...
+- WASM component based ecosystem is starting to emerge
+- WARG package registry
+  - Use any library for any language
+- WASM components as deployment artifacts
+  - Replacing docker/k8s
+  - Serverless functions for realz tho
+  - Already starting to happen
 
 ---
 
-# My prediction: WASM is going the same (ish) way
-- Browser stuff is cool
-- Server side is what matters
-- But now we have a truly open ecosystem
-
----
-
-# WASM is an *extremely* [dynamic space](https://webassembly.org/features/)
-## In particular, we should pay attention to:
-- WASM GC
-  - Enables garbage collected languages
-  - supported by Chrome, Firefox, NodeJS
-- Threads
-  - Chrome, Firefox, and Safari
-- Tail calls
-  - Chrome, Firefox
-
----
-
-# WebAssembly 2.0
-- first public draft 4/19/2022
-- 3 working drafts last month!
-
----
-
-# Guesting: Writing a WASM module from Elixir
-The bad news and the good news
+# But what about the browser?
+### Elixir as a Guest
 
 ---
 
@@ -325,28 +326,18 @@ The bad news and the good news
 # But then what?
 - Let's say Firefly gets "done"
 - Tracking Elixir/Erlang and keeping up
-- Official support for WASM would be the best possible future
-  - See me if this is something you wanna help advocate for
+- Official support for WASM would be the "gold standard"
+- Lot of work to get there
+- Lots of advocacy needed to make it happen
 
 ---
 
 # Orb: A DSL for WebAssembly
 - A completely different approach
-- Macros that compile to WAT
-  - and then to WASM
-- Less ambitious, but actually works!
-- Maybe worse is better?
-
----
-
-# More about Orb
-- *not* compiling Elixir to WASM
-- Thin layer over WebAssembly
-- globals, mutable state
-- controls flow
-  - if/then
-  - loops
-- Memory management
+- Macros that compile to WASM (via WAT)
+- Pretty low level
+  - No component support (yet)
+  - Memory management is up to you
 
 ---
 
@@ -367,7 +358,7 @@ wasm2wat temperature_converter.wat -o temperature_converter.wasm
 ```
 ---
 
-# Running it in [browser](hello.html)
+# Running it in [browser](temperature_converter.html)
 ```html
 <html>
 
@@ -392,138 +383,20 @@ wasm2wat temperature_converter.wat -o temperature_converter.wasm
 
 ---
 
-# WASM Components
-- Grew out of WASI
+# Other things Orb can do
+- Mutable globals (eww?)
+- Loops and conditionals
+- Memory allocation
+- String constants
+- Compile time Elixir
 
 ---
 
-# WIT
-#### An Interface Definition Language (IDL) for WASM Components
-- package
-  - world
-    - interface
-    - functions
-    - types
-    - import/exports
-
----
-# WIT type system
-- built in
-  - booleans
-  - numeric types
-  - string, char
-  - lists
-- user defined
-  - records
-  - variants
-  - enums
+# This is a start
+## But the reality is we are in danger of being [left behind](https://developer.fermyon.com/wasm-languages/webassembly-language-support)
 
 ---
 
-# WASM component implementations
-- Wasmtime (Rust)
-- JCO (Javascript)
-- componentize_py (Python)
-- ??? (Elixir)
-
----
-
-# Elixir and WASM Components
-- Wasmex
-  - wrapper for wasmtime
-  - components not yet supported
-- Rustler
-  - rust for elixir
-  - we can "roll our own"
-
----
-
-# WIT Example
-- This defines the interface my WASM component conforms to
-```
-package local:todo-list
-
-world todo-list {
-  export init: func() -> list<string>
-  export add-todo: func(todo: string, todos: list<string>) -> list<string>
-}
-```
-
----
-
-### The JS implementation...
-```js
-export function init() {
-  return ['Hello', 'WASM Components'];
-}
-
-export function addTodo(todo, todos) {
-  return [todo, ...todos];
-}
-```
-### Building it
-```
-jco componentize todo-list.js --wit todo-list.wit -n todo-list -o todo-list.wasm
-```
----
-
-### The Elixir code to call it..
-```elixir
-defmodule LivestateTestbedWeb.WasmComponent do
-  use Rustler, otp_app: :livestate_testbed, crate: "livestatetestbedweb_wasmcomponent"
-
-  # When your NIF is loaded, it will override this function.
-  def init(), do: error()
-  def add_todo(_todo, _todo_list), do: error()
-
-  defp error, do: :erlang.nif_error(:nif_not_loaded)
-end
-```
-
----
-
-## Rust code
-```rust
-#[rustler::nif(name = "add_todo")]
-fn add_todo_impl(todo: String, todo_list: Vec<String>) -> Vec<String> {
-    let mut config = Config::default();
-    config.wasm_component_model(true);
-    let engine = Engine::new(&config).unwrap();
-    let linker = Linker::new(&engine);
-
-    let mut table = Table::new();
-
-    let wasi = WasiCtxBuilder::new()
-        .build(&mut table);
-    let mut store = Store::new(&engine, wasi);
-
-    let component = Component::from_file(&engine, "./todo-list.wasm").context("Component file not found").unwrap();
-
-    let (instance, _) = TodoList::instantiate(&mut store, &component, &linker).unwrap();
-
-    instance.call_add_todo(&mut store, &todo, &todo_list[..]).unwrap()
-}
-
-rustler::init!("Elixir.LivestateTestbedWeb.WasmComponent", [init_impl, add_todo_impl]);
-```
----
-
-# Lets try it!
-
----
-
-# What will become possible..
-- WASM component based ecosystem is starting to emerge
-- WARG package registry
-  - Use any library for any language
-- WASM components as deployment artifacts
-  - Serverless functions for realz tho
-  - Already starting to happen
-
----
-
-# We don't want to be left behind
-### The good news: it's still early times
-### We have a lot of work to do!
+# You can help!
 
 ---
