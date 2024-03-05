@@ -38,10 +38,6 @@ chris@launchscout.com
 
 ---
 
-# Hi!
-
----
-
 # What is Web Assembly?
 ### AKA WASM
 - A spec for a virtual machine
@@ -191,7 +187,7 @@ module.exports = { handleForm };
 ## WebAssembly System Interface
   - WASM on the server
   - APIs Filesystems, networking, etc
-  - Used byosting provides
+  - Used by hosting providers
     - wasmedge
     - fermyon
 ---
@@ -290,12 +286,10 @@ end
 
 # Components: Yes, it's still early but...
 - WASM component based ecosystem is starting to emerge
-- WARG package registry
-  - Use any library for any language
-- WASM components as deployment artifacts
-  - Replacing docker/k8s
-  - Serverless functions for realz tho
-  - Already starting to happen
+- Scenarios:
+  - Deployment artifacts
+  - User extensions for SAAS eg replacing web hooks
+  - ???
 
 ---
 
@@ -346,15 +340,34 @@ end
 defmodule TemperatureConverter do
   use Orb
 
+  wasm_mode(Orb.F32)
+
+  global do
+    @mode 0
+  end
+
+  defw set_mode(mode: I32) do
+    @mode = mode
+  end
+
   defw celsius_to_fahrenheit(celsius: F32), F32 do
-    celsius |> F32.mul(F32.div(9.0, 5.0)) |> F32.add(32.0)
+    celsius * (9.0 / 5.0) + 32.0
+  end
+
+  defw fahrenheit_to_celsius(fahrenheit: F32), F32 do
+    (fahrenheit - 32.0) * (5.0 / 9.0)
+  end
+
+  defw convert_temperature(temperature: F32), F32 do
+    if @mode do
+      celsius_to_fahrenheit(temperature)
+    else
+      fahrenheit_to_celsius(temperature)
+    end
   end
 
 end
-```
-```
-iex> File.write!("temperature_converter.wat", Orb.to_wat(TemperatureConverter))
-wasm2wat temperature_converter.wat -o temperature_converter.wasm
+
 ```
 ---
 
@@ -364,18 +377,26 @@ wasm2wat temperature_converter.wat -o temperature_converter.wasm
 
 <head>
   <script type="module">
-
     const { instance } = await WebAssembly.instantiateStreaming(fetch("temperature_converter.wasm"), {});
-    const { celsius_to_fahrenheit } = instance.exports;
+    const { convert_temperature, set_mode } = instance.exports;
+    document.getElementById('mode').addEventListener('input', (evt) => {
+      set_mode(Number(evt.target.value));
+    });
     document.getElementById('slider').addEventListener('input', (evt) => {
-      console.log(`Celsius: ${evt.target.value}`);
-      console.log(`Fahrenheit: ${celsius_to_fahrenheit(Number(evt.target.value))}`);
+      document.getElementById('temperature').innerHTML = convert_temperature(Number(evt.target.value));
     })
   </script>
 </head>
 
 <body>
-  Temperature converter: <input type="range" id="slider" name="celsius" min="0" max="100" />
+  <div>
+    0 <input type="range" id="slider" name="celsius" min="0" max="100" /> 100
+  </div>
+  <select id="mode">
+    <option value="0">Fahrenheit to Celsius</option>
+    <option value="1">Celsius to Fahrenheit</option>
+  </select>
+  <div>Temperature: <span id="temperature"></span></div>
 </body>
 
 </html>
@@ -392,11 +413,10 @@ wasm2wat temperature_converter.wat -o temperature_converter.wasm
 
 ---
 
-# This is a start
-## But the reality is we are in danger of being [left behind](https://developer.fermyon.com/wasm-languages/webassembly-language-support)
-
----
-
-# You can help!
+# What would it take to support WASM components
+- Community involvement
+- Deep understanding of component spec
+- Lift/lower of erlang terms into WASM memory
+- Not easy, but definitely doable    
 
 ---
