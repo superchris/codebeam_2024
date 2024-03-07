@@ -39,12 +39,15 @@ chris@launchscout.com
 ---
 
 # What is Web Assembly?
-### AKA WASM
+### AKA WASM 
 - A spec for a virtual machine
 - Kinda like
   - BEAM
   - JVM
   - CLR
+
+---
+
 ## But..
 - Standardized by W3C (fine folks who brought us HTML etc)
 - Implemented by all the browsers
@@ -287,9 +290,12 @@ end
 # Components: Yes, it's still early but...
 - WASM component based ecosystem is starting to emerge
 - Scenarios:
+  - Using libraries from other ecosystems
   - Deployment artifacts
   - User extensions for SAAS eg replacing web hooks
-  - ???
+  - Any kind of software "plugin"
+  - Trigers and stored procs for DBs
+  - Replacing system specific languages
 
 ---
 
@@ -404,7 +410,7 @@ end
 
 ---
 
-# Other things Orb can do
+# Things Orb can do
 - Mutable globals (eww?)
 - Loops and conditionals
 - Memory allocation
@@ -413,10 +419,27 @@ end
 
 ---
 
-# What would it take to support WASM components
+# What would it take for Orb to support WASM components?
 - Community involvement
 - Deep understanding of component spec
-- Lift/lower of erlang terms into WASM memory
+- A fair bit of Rust
+  - Lift/lower of erlang terms into WASM memory
 - Not easy, but definitely doable    
+
+---
+
+# Conclusion
+- WebAssembly is an extremely dynamic space
+- IMHO its going to have a huge impact
+- Other languages and platforms are ahead
+- But there is still time!
+
+---
+
+# Resources
+- [Extism](https://extism.org)
+- [WebAssembly Component Model](https://component-model.bytecodealliance.org/)
+- [Orb](https://github.com/RoyalIcing/Orb)
+- [Launch Elements](https://elements.launchscout.com)
 
 ---
