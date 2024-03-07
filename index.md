@@ -456,5 +456,6 @@ end
 - [WebAssembly Component Model](https://component-model.bytecodealliance.org/)
 - [Orb](https://github.com/RoyalIcing/Orb)
 - [Launch Elements](https://elements.launchscout.com)
+- [component demo](https://github.com/superchris/wasm_component_demo)
 
 ---
