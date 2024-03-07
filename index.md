@@ -428,11 +428,26 @@ end
 
 ---
 
+# The approach I didn't talk about
+## WASM nodes in a cluster
+- [lunatic](lunatic.solutions)
+  - WebAssembly runtime inspired by Erlang
+  - not maintained, doesn't support components
+- Golang has [Ergo](https://github.com/ergo-services/ergo)
+- Will probably be much more viable as WASM components gain traction
+
+---
 # Conclusion
 - WebAssembly is an extremely dynamic space
 - IMHO its going to have a huge impact
 - Other languages and platforms are ahead
 - But there is still time!
+
+---
+
+# Thanks!
+
+![w:400](qrcode.png)
 
 ---
 
